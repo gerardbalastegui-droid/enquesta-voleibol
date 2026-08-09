@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Enquesta · Gestió d'equips de voleibol</title>
+<style>
+  :root{
+    --bg:#FBF6F0;
+    --card:#FFFFFF;
+    --ink:#2C2521;
+    --ink-soft:#6B5F56;
+    --ink-faint:#9A8C81;
+    --line:#E8DDD1;
+    --line-strong:#D8C8B8;
+    --accent:#C4623F;
+    --accent-soft:#FBEDE6;
+    --accent-ink:#8E3F24;
+    --ok:#3F7A5E;
+    --err:#B4402C;
+    --radius:14px;
+    --shadow:0 1px 2px rgba(44,37,33,.05), 0 8px 24px rgba(44,37,33,.06);
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    font-size:16px;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:640px;margin:0 auto;padding:0 16px 96px}
+
+  /* ---------- top bar ---------- */
+  .topbar{
+    position:sticky;top:0;z-index:20;
+    background:rgba(251,246,240,.92);
+    backdrop-filter:saturate(1.4) blur(8px);
+    -webkit-backdrop-filter:saturate(1.4) blur(8px);
+    border-bottom:1px solid var(--line);
+  }
+  .topbar-inner{
+    max-width:640px;margin:0 auto;padding:10px 16px;
+    display:flex;align-items:center;gap:12px;justify-content:space-between;
+  }
+  .brand{display:flex;align-items:center;gap:8px;font-weight:650;font-size:14px;letter-spacing:.01em}
+  .brand-dot{width:9px;height:9px;border-radius:50%;background:var(--accent);flex:none}
+  .lang{display:flex;gap:4px;background:#F1E7DB;padding:3px;border-radius:999px}
+  .lang button{
+    appearance:none;border:0;background:transparent;cursor:pointer;
+    font:inherit;font-size:13px;font-weight:600;color:var(--ink-soft);
+    padding:5px 12px;border-radius:999px;transition:.15s;
+  }
+  .lang button[aria-pressed="true"]{background:var(--card);color:var(--ink);box-shadow:0 1px 2px rgba(44,37,33,.12)}
+  .progress-track{height:3px;background:#EDE1D4}
+  .progress-bar{height:100%;width:0;background:var(--accent);transition:width .3s ease}
+
+  /* ---------- header ---------- */
+  header.intro{padding:36px 0 8px}
+  header.intro h1{font-size:27px;line-height:1.2;margin:0 0 12px;letter-spacing:-.02em;font-weight:700}
+  header.intro p{margin:0;color:var(--ink-soft);font-size:15.5px}
+  .meta-note{
+    margin-top:16px;display:inline-flex;gap:8px;align-items:center;
+    background:var(--accent-soft);color:var(--accent-ink);
+    padding:7px 13px;border-radius:999px;font-size:13px;font-weight:550;
+  }
+
+  /* ---------- sections ---------- */
+  section.sec{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:20px 18px;margin-top:18px;box-shadow:var(--shadow);
+  }
+  .sec-head{display:flex;align-items:baseline;gap:10px;margin-bottom:4px}
+  .sec-num{
+    font-size:12px;font-weight:700;color:var(--accent);
+    background:var(--accent-soft);border-radius:6px;padding:2px 7px;flex:none;
+  }
+  .sec-head h2{font-size:18px;margin:0;letter-spacing:-.01em;font-weight:680}
+  .sec-note{font-size:13.5px;color:var(--ink-faint);margin:8px 0 0;font-style:italic}
+
+  /* ---------- questions ---------- */
+  .q{padding:20px 0 0;border-top:1px solid var(--line);margin-top:20px}
+  .q:first-of-type{border-top:0;margin-top:14px;padding-top:0}
+  .q-label{display:block;font-weight:600;font-size:15.5px;margin-bottom:12px;line-height:1.4}
+  .req{color:var(--accent);margin-left:2px}
+  .optional{font-weight:400;color:var(--ink-faint);font-size:13.5px}
+  .hint{display:block;font-weight:400;color:var(--ink-faint);font-size:13.5px;margin-top:3px}
+
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{
+    display:flex;align-items:flex-start;gap:11px;cursor:pointer;
+    border:1px solid var(--line-strong);border-radius:10px;
+    padding:11px 13px;background:#FEFCFA;transition:.13s;
+  }
+  .opt:active{transform:scale(.995)}
+  .opt input{
+    appearance:none;-webkit-appearance:none;margin:0;flex:none;
+    width:19px;height:19px;border:1.5px solid var(--line-strong);background:#fff;
+    display:grid;place-content:center;transition:.13s;margin-top:1px;
+  }
+  .opt input[type=radio]{border-radius:50%}
+  .opt input[type=checkbox]{border-radius:5px}
+  .opt input::after{content:"";width:9px;height:9px;transform:scale(0);transition:.13s;background:#fff}
+  .opt input[type=radio]::after{border-radius:50%}
+  .opt input[type=checkbox]::after{
+    width:11px;height:11px;background:none;
+    clip-path:polygon(14% 45%,0 60%,40% 100%,100% 22%,84% 8%,38% 70%);
+  }
+  .opt input[type=checkbox]::after{background:#fff}
+  .opt input:checked{background:var(--accent);border-color:var(--accent)}
+  .opt input:checked::after{transform:scale(1)}
+  .opt input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .opt:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+  .opt span{font-size:15px;line-height:1.4}
+
+  /* text inputs */
+  input[type=text],input[type=number],textarea{
+    width:100%;font:inherit;font-size:16px;color:var(--ink);
+    background:#FEFCFA;border:1px solid var(--line-strong);border-radius:10px;
+    padding:11px 13px;transition:.13s;
+  }
+  textarea{min-height:96px;resize:vertical;line-height:1.5}
+  input:focus,textarea:focus{outline:0;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+  input::placeholder,textarea::placeholder{color:var(--ink-faint)}
+  .other-wrap{margin-top:8px;padding-left:2px}
+  .other-wrap[hidden]{display:none}
+
+  /* number pair */
+  .pair{display:flex;gap:12px}
+  .pair label{flex:1;display:block}
+  .pair .pair-cap{display:block;font-size:13px;color:var(--ink-soft);margin-bottom:5px;font-weight:550}
+
+  /* matrix */
+  .matrix{display:flex;flex-direction:column;gap:14px}
+  .mrow{border:1px solid var(--line);border-radius:11px;padding:13px;background:#FEFCFA}
+  .mrow-label{font-weight:600;font-size:14.5px;margin-bottom:10px;line-height:1.35}
+  .pills{display:flex;flex-wrap:wrap;gap:7px}
+  .pill{position:relative;cursor:pointer}
+  .pill input{position:absolute;opacity:0;width:0;height:0}
+  .pill span{
+    display:block;font-size:13.5px;padding:7px 12px;border-radius:999px;
+    border:1px solid var(--line-strong);background:#fff;color:var(--ink-soft);
+    transition:.13s;white-space:nowrap;
+  }
+  .pill input:checked+span{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:550}
+  .pill input:focus-visible+span{outline:2px solid var(--accent);outline-offset:2px}
+
+  /* scale */
+  .scale-row{display:flex;gap:7px}
+  .scale-row .pill{flex:1}
+  .scale-row .pill span{text-align:center;padding:12px 0;font-size:16px;font-weight:600;white-space:normal}
+  .scale-ends{display:flex;justify-content:space-between;gap:12px;margin-top:8px;font-size:12.5px;color:var(--ink-faint)}
+  .scale-ends span:last-child{text-align:right}
+
+  /* validation */
+  .q.invalid .q-label{color:var(--err)}
+  .q.invalid .opt,.q.invalid .mrow,.q.invalid textarea,.q.invalid input[type=text]{border-color:var(--err)}
+  .q-err{display:none;color:var(--err);font-size:13.5px;margin-top:9px;font-weight:550}
+  .q.invalid .q-err{display:block}
+
+  /* footer / submit */
+  .foot{margin-top:24px}
+  .btn{
+    width:100%;appearance:none;border:0;cursor:pointer;font:inherit;
+    font-size:16.5px;font-weight:650;color:#fff;background:var(--accent);
+    padding:16px;border-radius:12px;transition:.15s;
+    box-shadow:0 2px 8px rgba(196,98,63,.28);
+  }
+  .btn:hover{background:#B15636}
+  .btn:active{transform:translateY(1px)}
+  .btn[disabled]{opacity:.6;cursor:default;transform:none}
+  .form-err{
+    display:none;margin-top:12px;padding:12px 14px;border-radius:10px;
+    background:#FBE9E5;color:var(--err);font-size:14px;border:1px solid #F0CDC4;
+  }
+  .form-err.show{display:block}
+  .privacy{margin-top:14px;text-align:center;font-size:13px;color:var(--ink-faint)}
+
+  /* thanks */
+  .thanks{text-align:center;padding:64px 20px}
+  .thanks .mark{
+    width:60px;height:60px;border-radius:50%;background:var(--accent-soft);
+    color:var(--accent);display:grid;place-content:center;margin:0 auto 20px;font-size:29px;
+  }
+  .thanks h2{font-size:24px;margin:0 0 10px;letter-spacing:-.01em}
+  .thanks p{color:var(--ink-soft);margin:0 auto;max-width:400px}
+  .thanks .storage-note{margin-top:20px;font-size:12.5px;color:var(--ink-faint)}
+
+  [hidden]{display:none !important}
+
+  /* export view (only via #export) */
+  #export-view{padding:24px 0}
+  #export-view h2{font-size:18px;margin:0 0 8px}
+  #export-view p{color:var(--ink-soft);font-size:14px;margin:0 0 14px}
+  #export-view textarea{min-height:340px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px}
+
+  @media (min-width:600px){
+    .wrap{padding-bottom:120px}
+    section.sec{padding:24px 24px}
+    header.intro h1{font-size:32px}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand"><span class="brand-dot"></span><span data-i18n="brand"></span></div>
+    <div class="lang" role="group" aria-label="Idioma">
+      <button type="button" data-lang="ca" aria-pressed="true">Català</button>
+      <button type="button" data-lang="de" aria-pressed="false">Deutsch</button>
+    </div>
+  </div>
+  <div class="progress-track"><div class="progress-bar" id="progress-bar"></div></div>
+</div>
+
+<div class="wrap">
+
+  <div id="form-view">
+    <header class="intro">
+      <h1 data-i18n="intro_title"></h1>
+      <p data-i18n="intro_text"></p>
+      <div class="meta-note"><span aria-hidden="true">🔒</span><span data-i18n="intro_badge"></span></div>
+    </header>
+
+    <form id="form" novalidate>
+      <div id="sections"></div>
+
+      <div class="foot">
+        <button type="submit" class="btn" id="submit-btn" data-i18n="submit"></button>
+        <div class="form-err" id="form-err"></div>
+        <p class="privacy" data-i18n="privacy"></p>
+      </div>
+    </form>
+  </div>
+
+  <div id="thanks-view" class="thanks" hidden>
+    <div class="mark" aria-hidden="true">✓</div>
+    <h2 data-i18n="thanks_title"></h2>
+    <p data-i18n="thanks_text"></p>
+    <p class="storage-note" id="storage-note"></p>
+  </div>
+
+  <div id="export-view" hidden>
+    <h2 data-i18n="export_title"></h2>
+    <p data-i18n="export_text"></p>
+    <textarea id="export-box" readonly></textarea>
+  </div>
+
+</div>
+
+<script>
+"use strict";
+
+/* ============================================================================
+   CONFIGURACIÓ
+
+   Enganxa aquí la URL /exec del web app d'Apps Script (vegeu
+   research/backend/README.md). Mentre estigui buida, les respostes només es
+   desen en el dispositiu de qui omple el formulari i no arriben enlloc.
+   ========================================================================== */
+const ENDPOINT = "https://script.google.com/macros/s/AKfycby944pjeZbFFQX3I7fd2_6rkCyE98YLly1TaQkr54hBLKouzl7CiwqJzqW_TerxESrZNw/exec";
+
+/* ============================================================================
+   i18n — tots els textos de la pàgina / alle Texte der Seite
+   ========================================================================== */
+const T = {
+  ca: {
+    lang_attr: "ca",
+    doc_title: "Enquesta · Gestió d'equips de voleibol",
+    brand: "Enquesta voleibol",
+    intro_title: "Com gestioneu el dia a dia del vostre equip?",
+    intro_text: "Estem investigant com entrenadors, entrenadores i clubs de voleibol gestionen l'assistència, els entrenaments i la temporada. Trigaràs uns 5 minuts.",
+    intro_badge: "Anònim · no demanem cap dada de contacte",
+    submit: "Enviar respostes",
+    submitting: "Enviant…",
+    privacy: "No es recull ni el correu ni el telèfon. Les respostes s'utilitzen només de forma agregada.",
+    err_required: "Aquesta pregunta és obligatòria.",
+    err_other: "Especifica la resposta.",
+    err_form: "Falten algunes respostes obligatòries. Les hem marcades a sobre.",
+    err_save: "No hem pogut enviar la teva resposta. N'hem desat una còpia en aquest dispositiu; comprova la connexió i torna-ho a provar.",
+    progress_label: "Progrés del formulari",
+    thanks_title: "Gràcies!",
+    thanks_text: "La teva resposta s'ha desat. Ens ajuda a decidir què construir primer per a entrenadors i clubs de voleibol.",
+    saved_local: "Desat localment en aquest dispositiu.",
+    export_title: "Respostes desades en aquest dispositiu",
+    export_text: "Còpia aquest JSON per analitzar-lo. Només mostra les respostes desades localment en aquest navegador.",
+    other_ph: "Especifica…",
+    app_ph: "Quina app?",
+    optional: "opcional",
+    teams_cap: "Equips",
+    players_cap: "Jugadors/es",
+
+    sec_context: "Context",
+    sec_tools: "Eines actuals",
+    sec_pain: "Frustracions",
+    sec_interest: "Interès",
+    sec_club: "Coordinació de club",
+    sec_player: "Entrenar i jugar alhora",
+    sec_club_note: "Aquesta secció apareix perquè has indicat un rol de coordinació al club.",
+
+    q_role: "Quin és el teu rol al club?",
+    q_role_hint: "Pots marcar-ne més d'un si en fas diversos.",
+    o_role_coach: "Entrenador/a",
+    o_role_td: "Director/a tècnic/a",
+    o_role_coord: "Coordinador/a de club",
+    o_role_other: "Altres (especifica)",
+
+    q_levels: "Quins nivells entrenes?",
+    q_levels_hint: "Pots marcar-ne més d'un.",
+    o_lvl_mini: "Mini Volei",
+    o_lvl_infantil: "Infantil",
+    o_lvl_cadet: "Cadet",
+    o_lvl_juvenil: "Juvenil",
+    o_lvl_junior: "Junior",
+    o_lvl_senior: "Sènior",
+
+    q_size_manage: "Quants equips i jugadors gestiones?",
+    q_club_name: "Nom del club",
+    q_club_name_ph: "Per exemple: CV Girona",
+    q_club_size: "Mida aproximada del club",
+    o_club_small: "Petit (menys de 10 equips)",
+    o_club_mid: "Mitjà (10-20 equips)",
+    o_club_big: "Gran (més de 20 equips)",
+
+    q_tools: "Per a cada tasca, què fas servir avui?",
+    q_tools_hint: "Pots marcar més d'una opció per tasca.",
+    r_attendance: "Control d'assistència",
+    r_sessions: "Planificació d'entrenaments i sessions",
+    r_season: "Planificació de temporada (objectius, periodització)",
+    r_stats: "Estadístiques o scouting de partits",
+    r_comms: "Comunicació amb jugadors i famílies",
+    o_t_excel: "Excel / full de càlcul",
+    o_t_paper: "Paper",
+    o_t_wa: "WhatsApp / Telegram",
+    o_t_app: "App específica",
+    o_t_none: "Res",
+
+    q_admin_time: "Quant temps a la setmana dediques a tasques administratives (no a entrenar)?",
+    o_time_1: "Menys d'1 h",
+    o_time_2: "1-3 h",
+    o_time_3: "3-6 h",
+    o_time_4: "Més de 6 h",
+
+    q_pain: "D'aquestes tasques, quina et treu més temps o et frustra més?",
+    q_pain_hint: "Pots marcar-ne més d'una.",
+    o_p_attendance: "Control d'assistència",
+    o_p_sessions: "Disseny de sessions",
+    o_p_season: "Seguiment del progrés de la temporada",
+    o_p_comms: "Comunicació amb jugadors i famílies",
+    o_p_stats: "Estadístiques de partit",
+    o_p_other: "Una altra (especifica)",
+
+    q_pain_story: "Explica'ns l'última vegada que vas perdre temps o vas cometre un error per no tenir això ben organitzat.",
+    q_pain_story_ph: "Què va passar? Com ho vas resoldre?",
+    q_satisfaction: "Com de satisfet/a estàs amb la teva manera actual de gestionar aquestes tasques?",
+    sc_sat_low: "1 · Gens satisfet/a",
+    sc_sat_high: "5 · Molt satisfet/a",
+
+    q_try: "Si existís una eina digital pensada específicament per al voleibol que resolgués el teu principal problema, la provaries?",
+    o_try_1: "Sí, segur",
+    o_try_2: "Probablement",
+    o_try_3: "No ho sé",
+    o_try_4: "Probablement no",
+    q_pay: "Pagaries alguna cosa per una eina així?",
+    o_pay_1: "Res, només si és gratuïta",
+    o_pay_2: "Alguna cosa simbòlica, uns pocs euros al mes",
+    o_pay_3: "Una quota mensual raonable si em resol el problema",
+    o_pay_4: "Depèn del preu i de les funcionalitats",
+    q_wish: "Hi ha res més que t'agradaria que resolgués una eina així?",
+    q_wish_ph: "Qualsevol idea ens serveix.",
+
+    q_assign: "Com assigneu avui quin entrenador porta cada equip al llarg de la temporada?",
+    o_as_1: "Criteri informal, de memòria",
+    o_as_2: "Full de càlcul",
+    o_as_3: "Reunió i decisió manual cada temporada",
+    o_as_4: "Altre (especifica)",
+    q_courts: "Què feu servir per planificar els horaris de pista o pavelló de tota la temporada (entrenaments i partits de tots els equips)?",
+    o_ct_1: "Excel / full de càlcul",
+    o_ct_2: "Paper",
+    o_ct_3: "App de gestió d'instal·lacions",
+    o_ct_4: "Altre (especifica)",
+    q_overlap_easy: "Com de fàcil és avui detectar solapaments d'horari entre equips o entrenadors?",
+    sc_easy_low: "1 · Molt difícil",
+    sc_easy_high: "5 · Molt fàcil",
+    q_overlap_story: "Explica'ns l'última vegada que hi va haver un problema de solapament d'horaris (de pista, d'entrenador, de partit) i com el vau resoldre.",
+    q_overlap_story_ph: "Què va passar? Qui ho va resoldre i com?",
+    q_doblatges: "Com de fàcil és planificar els doblatges de jugadors?",
+    q_doblatges_hint: "Jugadors/es que juguen o entrenen amb més d'un equip del club.",
+
+    q_is_player: "A més d'entrenar, ets també jugador/a d'algun equip (del mateix club o d'un altre)?",
+    o_yes: "Sí",
+    o_no: "No",
+    q_clash: "S'han solapat mai els teus horaris d'entrenament o partit com a jugador/a amb els teus horaris com a entrenador/a?",
+    o_cl_1: "Sí, sovint",
+    o_cl_2: "Sí, alguna vegada",
+    o_cl_3: "No",
+    o_cl_4: "No ho sé",
+    q_clash_fix: "Com se sol resoldre avui aquest solapament?",
+    o_cf_1: "Canvi d'horari acordat manualment amb el club",
+    o_cf_2: "Es prioritza un dels dos i l'altre se'n ressent",
+    o_cf_3: "No es resol bé",
+    o_cf_4: "Altre (especifica)"
+  },
+
+  de: {
+    lang_attr: "de",
+    doc_title: "Umfrage · Verwaltung von Volleyballteams",
+    brand: "Volleyball-Umfrage",
+    intro_title: "Wie organisiert ihr den Alltag eures Teams?",
+    intro_text: "Wir untersuchen, wie Trainerinnen, Trainer und Volleyballvereine Anwesenheit, Trainings und die Saison verwalten. Es dauert etwa 5 Minuten.",
+    intro_badge: "Anonym · wir fragen keine Kontaktdaten ab",
+    submit: "Antworten senden",
+    submitting: "Wird gesendet…",
+    privacy: "Wir erfassen weder E-Mail noch Telefonnummer. Die Antworten werden nur zusammengefasst ausgewertet.",
+    err_required: "Diese Frage ist eine Pflichtfrage.",
+    err_other: "Bitte gib deine Antwort an.",
+    err_form: "Es fehlen noch Pflichtantworten. Wir haben sie oben markiert.",
+    err_save: "Deine Antwort konnte nicht gesendet werden. Wir haben eine Kopie auf diesem Gerät gespeichert. Prüfe die Verbindung und versuche es erneut.",
+    progress_label: "Fortschritt des Formulars",
+    thanks_title: "Danke!",
+    thanks_text: "Deine Antwort wurde gespeichert. Sie hilft uns zu entscheiden, was wir für Trainer:innen und Volleyballvereine zuerst bauen.",
+    saved_local: "Lokal auf diesem Gerät gespeichert.",
+    export_title: "Auf diesem Gerät gespeicherte Antworten",
+    export_text: "Kopiere dieses JSON zur Auswertung. Es zeigt nur die lokal in diesem Browser gespeicherten Antworten.",
+    other_ph: "Bitte angeben…",
+    app_ph: "Welche App?",
+    optional: "optional",
+    teams_cap: "Teams",
+    players_cap: "Spieler:innen",
+
+    sec_context: "Kontext",
+    sec_tools: "Aktuelle Werkzeuge",
+    sec_pain: "Frustrationen",
+    sec_interest: "Interesse",
+    sec_club: "Vereinskoordination",
+    sec_player: "Trainieren und selbst spielen",
+    sec_club_note: "Dieser Abschnitt erscheint, weil du eine koordinierende Rolle im Verein angegeben hast.",
+
+    q_role: "Welche Rolle hast du im Verein?",
+    q_role_hint: "Mehrfachauswahl möglich, wenn du mehrere Rollen hast.",
+    o_role_coach: "Trainer:in",
+    o_role_td: "Sportliche:r Leiter:in",
+    o_role_coord: "Vereinskoordinator:in",
+    o_role_other: "Sonstiges (bitte angeben)",
+
+    q_levels: "Welche Altersklassen trainierst du?",
+    q_levels_hint: "Mehrfachauswahl möglich.",
+    o_lvl_mini: "Mini-Volleyball (U11 / U12)",
+    o_lvl_infantil: "U14",
+    o_lvl_cadet: "U16",
+    o_lvl_juvenil: "U18",
+    o_lvl_junior: "U20",
+    o_lvl_senior: "Senioren / Aktive",
+
+    q_size_manage: "Wie viele Teams und Spieler:innen betreust du?",
+    q_club_name: "Name des Vereins",
+    q_club_name_ph: "Zum Beispiel: TSV Musterstadt",
+    q_club_size: "Ungefähre Größe des Vereins",
+    o_club_small: "Klein (weniger als 10 Teams)",
+    o_club_mid: "Mittel (10-20 Teams)",
+    o_club_big: "Groß (mehr als 20 Teams)",
+
+    q_tools: "Was benutzt du heute für jede dieser Aufgaben?",
+    q_tools_hint: "Pro Aufgabe ist Mehrfachauswahl möglich.",
+    r_attendance: "Anwesenheitskontrolle",
+    r_sessions: "Planung von Trainings und Einheiten",
+    r_season: "Saisonplanung (Ziele, Periodisierung)",
+    r_stats: "Statistiken oder Spiel-Scouting",
+    r_comms: "Kommunikation mit Spieler:innen und Familien",
+    o_t_excel: "Excel / Tabellenkalkulation",
+    o_t_paper: "Papier",
+    o_t_wa: "WhatsApp / Telegram",
+    o_t_app: "Spezielle App",
+    o_t_none: "Nichts",
+
+    q_admin_time: "Wie viel Zeit pro Woche verbringst du mit Verwaltungsaufgaben (nicht mit Training)?",
+    o_time_1: "Weniger als 1 Std.",
+    o_time_2: "1-3 Std.",
+    o_time_3: "3-6 Std.",
+    o_time_4: "Mehr als 6 Std.",
+
+    q_pain: "Welche dieser Aufgaben kostet dich am meisten Zeit oder frustriert dich am meisten?",
+    q_pain_hint: "Mehrfachauswahl möglich.",
+    o_p_attendance: "Anwesenheitskontrolle",
+    o_p_sessions: "Gestaltung der Trainingseinheiten",
+    o_p_season: "Verfolgung des Saisonfortschritts",
+    o_p_comms: "Kommunikation mit Spieler:innen und Familien",
+    o_p_stats: "Spielstatistiken",
+    o_p_other: "Etwas anderes (bitte angeben)",
+
+    q_pain_story: "Erzähl uns von dem letzten Mal, als du Zeit verloren oder einen Fehler gemacht hast, weil das nicht gut organisiert war.",
+    q_pain_story_ph: "Was ist passiert? Wie hast du es gelöst?",
+    q_satisfaction: "Wie zufrieden bist du mit deiner aktuellen Art, diese Aufgaben zu verwalten?",
+    sc_sat_low: "1 · Gar nicht zufrieden",
+    sc_sat_high: "5 · Sehr zufrieden",
+
+    q_try: "Wenn es ein digitales Werkzeug speziell für Volleyball gäbe, das dein Hauptproblem löst — würdest du es ausprobieren?",
+    o_try_1: "Ja, auf jeden Fall",
+    o_try_2: "Wahrscheinlich",
+    o_try_3: "Ich weiß nicht",
+    o_try_4: "Wahrscheinlich nicht",
+    q_pay: "Würdest du für so ein Werkzeug etwas bezahlen?",
+    o_pay_1: "Nichts, nur wenn es kostenlos ist",
+    o_pay_2: "Etwas Symbolisches, ein paar Euro im Monat",
+    o_pay_3: "Eine angemessene Monatsgebühr, wenn es mein Problem löst",
+    o_pay_4: "Kommt auf Preis und Funktionen an",
+    q_wish: "Gibt es noch etwas, das so ein Werkzeug für dich lösen sollte?",
+    q_wish_ph: "Jede Idee hilft uns weiter.",
+
+    q_assign: "Wie legt ihr heute fest, welche:r Trainer:in welches Team über die Saison betreut?",
+    o_as_1: "Informell, aus dem Gedächtnis",
+    o_as_2: "Tabellenkalkulation",
+    o_as_3: "Besprechung und manuelle Entscheidung jede Saison",
+    o_as_4: "Anderes (bitte angeben)",
+    q_courts: "Was benutzt ihr, um die Hallenzeiten für die ganze Saison zu planen (Trainings und Spiele aller Teams)?",
+    o_ct_1: "Excel / Tabellenkalkulation",
+    o_ct_2: "Papier",
+    o_ct_3: "App für Hallen- und Anlagenverwaltung",
+    o_ct_4: "Anderes (bitte angeben)",
+    q_overlap_easy: "Wie einfach ist es heute, Terminüberschneidungen zwischen Teams oder Trainer:innen zu erkennen?",
+    sc_easy_low: "1 · Sehr schwierig",
+    sc_easy_high: "5 · Sehr einfach",
+    q_overlap_story: "Erzähl uns vom letzten Terminkonflikt (Halle, Trainer:in, Spiel) und wie ihr ihn gelöst habt.",
+    q_overlap_story_ph: "Was ist passiert? Wer hat es wie gelöst?",
+    q_doblatges: "Wie einfach ist es, den Einsatz von Spieler:innen in mehreren Teams zu planen?",
+    q_doblatges_hint: "Spieler:innen, die in mehr als einem Team des Vereins spielen oder trainieren (Doppelspielrecht).",
+
+    q_is_player: "Bist du neben dem Trainerjob auch Spieler:in in einem Team (im selben oder einem anderen Verein)?",
+    o_yes: "Ja",
+    o_no: "Nein",
+    q_clash: "Haben sich deine Trainings- oder Spielzeiten als Spieler:in jemals mit deinen Zeiten als Trainer:in überschnitten?",
+    o_cl_1: "Ja, oft",
+    o_cl_2: "Ja, manchmal",
+    o_cl_3: "Nein",
+    o_cl_4: "Ich weiß nicht",
+    q_clash_fix: "Wie wird diese Überschneidung heute normalerweise gelöst?",
+    o_cf_1: "Terminänderung, manuell mit dem Verein abgesprochen",
+    o_cf_2: "Eines von beiden hat Vorrang, das andere leidet darunter",
+    o_cf_3: "Es wird nicht gut gelöst",
+    o_cf_4: "Anderes (bitte angeben)"
+  }
+};
+
+/* ============================================================================
+   Esquema del formulari
+   type: radio | checkbox | text | textarea | numberpair | scale | matrix
+   ========================================================================== */
+const ROLE_COORD = ["director_tecnic", "coordinador_club"];
+
+const SCHEMA = [
+  {
+    id: "s1", title: "sec_context",
+    questions: [
+      { id: "rol", type: "checkbox", label: "q_role", hint: "q_role_hint", required: true, options: [
+          { v: "entrenador",        t: "o_role_coach" },
+          { v: "director_tecnic",   t: "o_role_td" },
+          { v: "coordinador_club",  t: "o_role_coord" },
+          { v: "altres",            t: "o_role_other", other: true }
+      ]},
+      { id: "nivells", type: "checkbox", label: "q_levels", hint: "q_levels_hint", required: true, options: [
+          { v: "mini_volei", t: "o_lvl_mini" },
+          { v: "infantil",   t: "o_lvl_infantil" },
+          { v: "cadet",      t: "o_lvl_cadet" },
+          { v: "juvenil",    t: "o_lvl_juvenil" },
+          { v: "junior",     t: "o_lvl_junior" },
+          { v: "senior",     t: "o_lvl_senior" }
+      ]},
+      { id: "volum", type: "numberpair", label: "q_size_manage", required: true,
+        fields: [ { id: "equips", cap: "teams_cap" }, { id: "jugadors", cap: "players_cap" } ] },
+      { id: "club_nom", type: "text", label: "q_club_name", placeholder: "q_club_name_ph", required: false },
+      { id: "club_mida", type: "radio", label: "q_club_size", required: true, options: [
+          { v: "petit",  t: "o_club_small" },
+          { v: "mitja",  t: "o_club_mid" },
+          { v: "gran",   t: "o_club_big" }
+      ]}
+    ]
+  },
+  {
+    id: "s2", title: "sec_tools",
+    questions: [
+      { id: "eines", type: "matrix", multi: true, label: "q_tools", hint: "q_tools_hint", required: true,
+        rows: [
+          { id: "assistencia", t: "r_attendance" },
+          { id: "sessions",    t: "r_sessions" },
+          { id: "temporada",   t: "r_season" },
+          { id: "estadistiques", t: "r_stats" },
+          { id: "comunicacio", t: "r_comms" }
+        ],
+        options: [
+          { v: "excel",  t: "o_t_excel" },
+          { v: "paper",  t: "o_t_paper" },
+          { v: "missatgeria", t: "o_t_wa" },
+          { v: "app",    t: "o_t_app", other: true, otherPh: "app_ph" },
+          { v: "res",    t: "o_t_none", exclusive: true }
+        ]
+      },
+      { id: "temps_admin", type: "radio", label: "q_admin_time", required: true, options: [
+          { v: "menys_1h", t: "o_time_1" },
+          { v: "1_3h",     t: "o_time_2" },
+          { v: "3_6h",     t: "o_time_3" },
+          { v: "mes_6h",   t: "o_time_4" }
+      ]}
+    ]
+  },
+  {
+    id: "s3", title: "sec_pain",
+    questions: [
+      { id: "dolor", type: "checkbox", label: "q_pain", hint: "q_pain_hint", required: true, options: [
+          { v: "assistencia", t: "o_p_attendance" },
+          { v: "sessions",    t: "o_p_sessions" },
+          { v: "temporada",   t: "o_p_season" },
+          { v: "comunicacio", t: "o_p_comms" },
+          { v: "estadistiques", t: "o_p_stats" },
+          { v: "altra",       t: "o_p_other", other: true }
+      ]},
+      { id: "dolor_historia", type: "textarea", label: "q_pain_story", placeholder: "q_pain_story_ph", required: true },
+      { id: "satisfaccio", type: "scale", label: "q_satisfaction", required: true,
+        low: "sc_sat_low", high: "sc_sat_high" }
+    ]
+  },
+  {
+    id: "s4", title: "sec_interest",
+    questions: [
+      { id: "provaria", type: "radio", label: "q_try", required: true, options: [
+          { v: "si_segur",       t: "o_try_1" },
+          { v: "probablement",   t: "o_try_2" },
+          { v: "no_ho_se",       t: "o_try_3" },
+          { v: "probablement_no",t: "o_try_4" }
+      ]},
+      { id: "pagaria", type: "radio", label: "q_pay", required: true, options: [
+          { v: "res_gratis",  t: "o_pay_1" },
+          { v: "simbolic",    t: "o_pay_2" },
+          { v: "quota_raonable", t: "o_pay_3" },
+          { v: "depen",       t: "o_pay_4" }
+      ]},
+      { id: "desitjos", type: "textarea", label: "q_wish", placeholder: "q_wish_ph", required: false }
+    ]
+  },
+  {
+    id: "s5", title: "sec_club", note: "sec_club_note",
+    showIf: (a) => !!(a.rol && a.rol.values && a.rol.values.some((v) => ROLE_COORD.includes(v))),
+    questions: [
+      { id: "assignacio", type: "radio", label: "q_assign", required: true, options: [
+          { v: "informal",   t: "o_as_1" },
+          { v: "full_calcul", t: "o_as_2" },
+          { v: "reunio_manual", t: "o_as_3" },
+          { v: "altre",      t: "o_as_4", other: true }
+      ]},
+      { id: "horaris_pista", type: "radio", label: "q_courts", required: true, options: [
+          { v: "excel",  t: "o_ct_1" },
+          { v: "paper",  t: "o_ct_2" },
+          { v: "app_installacions", t: "o_ct_3" },
+          { v: "altre",  t: "o_ct_4", other: true }
+      ]},
+      { id: "facilitat_solapaments", type: "scale", label: "q_overlap_easy", required: true,
+        low: "sc_easy_low", high: "sc_easy_high" },
+      { id: "solapament_historia", type: "textarea", label: "q_overlap_story", placeholder: "q_overlap_story_ph", required: true },
+      { id: "doblatges", type: "scale", label: "q_doblatges", hint: "q_doblatges_hint", required: true,
+        showIf: (a) => !!(a.rol && a.rol.values && a.rol.values.includes("director_tecnic")),
+        low: "sc_easy_low", high: "sc_easy_high" }
+    ]
+  },
+  {
+    id: "s6", title: "sec_player",
+    questions: [
+      { id: "es_jugador", type: "radio", label: "q_is_player", required: true, options: [
+          { v: "si", t: "o_yes" },
+          { v: "no", t: "o_no" }
+      ]},
+      { id: "solapament_propi", type: "radio", label: "q_clash", required: true,
+        showIf: (a) => a.es_jugador && a.es_jugador.value === "si",
+        options: [
+          { v: "si_sovint",  t: "o_cl_1" },
+          { v: "si_alguna",  t: "o_cl_2" },
+          { v: "no",         t: "o_cl_3" },
+          { v: "no_ho_se",   t: "o_cl_4" }
+      ]},
+      { id: "solapament_propi_solucio", type: "radio", label: "q_clash_fix", required: true,
+        showIf: (a) => a.es_jugador && a.es_jugador.value === "si",
+        options: [
+          { v: "canvi_acordat", t: "o_cf_1" },
+          { v: "prioritza_un",  t: "o_cf_2" },
+          { v: "no_es_resol",   t: "o_cf_3" },
+          { v: "altre",         t: "o_cf_4", other: true }
+      ]}
+    ]
+  }
+];
+
+/* ============================================================================
+   Estat i utilitats
+   ========================================================================== */
+let lang = "ca";
+let pendingId = null;
+const form = document.getElementById("form");
+const sectionsEl = document.getElementById("sections");
+const progressBar = document.getElementById("progress-bar");
+const formErr = document.getElementById("form-err");
+const submitBtn = document.getElementById("submit-btn");
+
+const t = (key) => (T[lang] && T[lang][key]) || (T.ca[key] || key);
+
+function uuid() {
+  if (window.crypto && typeof crypto.randomUUID === "function") return crypto.randomUUID();
+  const b = new Uint8Array(16);
+  (window.crypto || {}).getRandomValues
+    ? crypto.getRandomValues(b)
+    : b.forEach((_, i) => (b[i] = Math.floor(Math.random() * 256)));
+  b[6] = (b[6] & 0x0f) | 0x40;
+  b[8] = (b[8] & 0x3f) | 0x80;
+  const h = [...b].map((x) => x.toString(16).padStart(2, "0"));
+  return `${h.slice(0,4).join("")}-${h.slice(4,6).join("")}-${h.slice(6,8).join("")}-${h.slice(8,10).join("")}-${h.slice(10,16).join("")}`;
+}
+
+function el(tag, attrs, children) {
+  const n = document.createElement(tag);
+  if (attrs) for (const k in attrs) {
+    if (k === "class") n.className = attrs[k];
+    else if (k === "dataset") Object.assign(n.dataset, attrs[k]);
+    else if (k in n && k !== "list") n[k] = attrs[k];
+    else n.setAttribute(k, attrs[k]);
+  }
+  (children || []).forEach((c) => n.appendChild(typeof c === "string" ? document.createTextNode(c) : c));
+  return n;
+}
+const i18nSpan = (key, cls) => el("span", { class: cls || "", dataset: { i18n: key } });
+
+/* ============================================================================
+   Construcció del DOM
+   ========================================================================== */
+const questionIndex = {}; // id -> { def, node, sectionDef }
+
+function buildQuestion(q) {
+  const wrap = el("div", { class: "q", id: `q-${q.id}` });
+  wrap.dataset.qid = q.id;
+
+  const label = el("label", { class: "q-label" });
+  label.appendChild(i18nSpan(q.label));
+  if (q.required) label.appendChild(el("span", { class: "req" }, ["*"]));
+  else {
+    label.appendChild(document.createTextNode(" "));
+    const opt = i18nSpan("optional", "optional");
+    label.appendChild(el("span", { class: "optional" }, ["(", opt, ")"]));
+  }
+  if (q.hint) label.appendChild(i18nSpan(q.hint, "hint"));
+  wrap.appendChild(label);
+
+  const name = `q_${q.id}`;
+
+  if (q.type === "radio" || q.type === "checkbox") {
+    const opts = el("div", { class: "opts" });
+    q.options.forEach((o) => {
+      const input = el("input", { type: q.type, name: name, value: o.v });
+      const row = el("label", { class: "opt" }, [input, i18nSpan(o.t)]);
+      opts.appendChild(row);
+      if (o.other) {
+        const otherIn = el("input", {
+          type: "text", class: "other-input",
+          dataset: { otherFor: `${q.id}:${o.v}`, ph: o.otherPh || "other_ph" }
+        });
+        const ow = el("div", { class: "other-wrap", hidden: true }, [otherIn]);
+        opts.appendChild(ow);
+        input.addEventListener("change", () => { ow.hidden = !input.checked; if (input.checked) otherIn.focus(); });
+        if (q.type === "radio") {
+          opts.addEventListener("change", () => { if (!input.checked) ow.hidden = true; });
+        }
+      }
+    });
+    wrap.appendChild(opts);
+
+  } else if (q.type === "text") {
+    wrap.appendChild(el("input", { type: "text", name: name, dataset: { ph: q.placeholder || "" } }));
+
+  } else if (q.type === "textarea") {
+    wrap.appendChild(el("textarea", { name: name, rows: 4, dataset: { ph: q.placeholder || "" } }));
+
+  } else if (q.type === "numberpair") {
+    const pair = el("div", { class: "pair" });
+    q.fields.forEach((f) => {
+      const cap = i18nSpan(f.cap, "pair-cap");
+      const input = el("input", { type: "number", min: "0", step: "1", name: `${name}_${f.id}`, inputMode: "numeric" });
+      pair.appendChild(el("label", {}, [cap, input]));
+    });
+    wrap.appendChild(pair);
+
+  } else if (q.type === "scale") {
+    const row = el("div", { class: "scale-row" });
+    for (let i = 1; i <= 5; i++) {
+      const input = el("input", { type: "radio", name: name, value: String(i) });
+      row.appendChild(el("label", { class: "pill" }, [input, el("span", {}, [String(i)])]));
+    }
+    wrap.appendChild(row);
+    wrap.appendChild(el("div", { class: "scale-ends" }, [i18nSpan(q.low), i18nSpan(q.high)]));
+
+  } else if (q.type === "matrix") {
+    const m = el("div", { class: "matrix" });
+    q.rows.forEach((r) => {
+      const rowName = `${name}_${r.id}`;
+      const pills = el("div", { class: "pills" });
+      const box = el("div", { class: "mrow" }, [i18nSpan(r.t, "mrow-label"), pills]);
+      box.dataset.rowId = r.id;
+      const cellType = q.multi ? "checkbox" : "radio";
+      q.options.forEach((o) => {
+        const input = el("input", { type: cellType, name: rowName, value: o.v });
+        pills.appendChild(el("label", { class: "pill" }, [input, i18nSpan(o.t)]));
+
+        // "Res" és excloent: marcar-la desmarca la resta, i a l'inrevés.
+        if (q.multi) {
+          input.addEventListener("change", () => {
+            if (!input.checked) return;
+            const all = [...pills.querySelectorAll("input")];
+            if (o.exclusive) all.forEach((x) => { if (x !== input) x.checked = false; });
+            else all.forEach((x) => {
+              const def = q.options.find((z) => z.v === x.value);
+              if (def && def.exclusive) x.checked = false;
+            });
+            box.dispatchEvent(new Event("change", { bubbles: true }));
+          });
+        }
+
+        if (o.other) {
+          const otherIn = el("input", {
+            type: "text", class: "other-input",
+            dataset: { otherFor: `${q.id}.${r.id}:${o.v}`, ph: o.otherPh || "other_ph" }
+          });
+          const ow = el("div", { class: "other-wrap", hidden: true }, [otherIn]);
+          box.appendChild(ow);
+          box.addEventListener("change", () => {
+            ow.hidden = !input.checked;
+            if (input.checked && document.activeElement !== otherIn) otherIn.focus();
+          });
+        }
+      });
+      m.appendChild(box);
+    });
+    wrap.appendChild(m);
+  }
+
+  wrap.appendChild(i18nSpan("err_required", "q-err"));
+  questionIndex[q.id] = { def: q, node: wrap };
+  return wrap;
+}
+
+SCHEMA.forEach((sec, si) => {
+  const secEl = el("section", { class: "sec", id: `sec-${sec.id}` });
+  secEl.appendChild(el("div", { class: "sec-head" }, [
+    el("span", { class: "sec-num" }, [String(si + 1)]),
+    el("h2", {}, [i18nSpan(sec.title)])
+  ]));
+  if (sec.note) secEl.appendChild(el("p", { class: "sec-note" }, [i18nSpan(sec.note)]));
+  sec.questions.forEach((q) => secEl.appendChild(buildQuestion(q)));
+  sectionsEl.appendChild(secEl);
+  sec._node = secEl;
+});
+
+/* ============================================================================
+   Lectura de respostes
+   ========================================================================== */
+function otherValue(sel) {
+  const n = document.querySelector(`.other-input[data-other-for="${sel}"]`);
+  return n ? n.value.trim() : "";
+}
+
+function readQuestion(q) {
+  const name = `q_${q.id}`;
+  if (q.type === "radio") {
+    const c = form.querySelector(`input[name="${name}"]:checked`);
+    if (!c) return null;
+    const opt = q.options.find((o) => o.v === c.value);
+    const res = { value: c.value };
+    if (opt && opt.other) res.other = otherValue(`${q.id}:${c.value}`);
+    return res;
+  }
+  if (q.type === "checkbox") {
+    const checked = [...form.querySelectorAll(`input[name="${name}"]:checked`)];
+    if (!checked.length) return null;
+    const res = { values: checked.map((c) => c.value) };
+    checked.forEach((c) => {
+      const opt = q.options.find((o) => o.v === c.value);
+      if (opt && opt.other) { res.other = res.other || {}; res.other[c.value] = otherValue(`${q.id}:${c.value}`); }
+    });
+    return res;
+  }
+  if (q.type === "scale") {
+    const c = form.querySelector(`input[name="${name}"]:checked`);
+    return c ? { value: Number(c.value) } : null;
+  }
+  if (q.type === "text" || q.type === "textarea") {
+    const n = form.querySelector(`[name="${name}"]`);
+    const v = n ? n.value.trim() : "";
+    return v ? { value: v } : null;
+  }
+  if (q.type === "numberpair") {
+    const out = {};
+    let any = false;
+    q.fields.forEach((f) => {
+      const n = form.querySelector(`[name="${name}_${f.id}"]`);
+      const v = n && n.value !== "" ? Number(n.value) : null;
+      out[f.id] = v;
+      if (v !== null && !Number.isNaN(v)) any = true;
+    });
+    return any ? out : null;
+  }
+  if (q.type === "matrix") {
+    const out = {};
+    let filled = 0;
+    q.rows.forEach((r) => {
+      const checked = [...form.querySelectorAll(`input[name="${name}_${r.id}"]:checked`)];
+      if (!checked.length) { out[r.id] = null; return; }
+      filled++;
+      const cell = q.multi ? { values: checked.map((c) => c.value) } : { value: checked[0].value };
+      checked.forEach((c) => {
+        const opt = q.options.find((o) => o.v === c.value);
+        if (!opt || !opt.other) return;
+        const txt = otherValue(`${q.id}.${r.id}:${c.value}`);
+        if (q.multi) { cell.other = cell.other || {}; cell.other[c.value] = txt; }
+        else cell.other = txt;
+      });
+      out[r.id] = cell;
+    });
+    return filled === q.rows.length ? out : (filled ? { _partial: true, ...out } : null);
+  }
+  return null;
+}
+
+function readAll() {
+  const a = {};
+  SCHEMA.forEach((s) => s.questions.forEach((q) => { a[q.id] = readQuestion(q); }));
+  return a;
+}
+
+/* ============================================================================
+   Visibilitat condicional + progrés
+   ========================================================================== */
+function isSectionVisible(sec, answers) { return !sec.showIf || !!sec.showIf(answers); }
+function isQuestionVisible(sec, q, answers) {
+  return isSectionVisible(sec, answers) && (!q.showIf || !!q.showIf(answers));
+}
+
+function isAnswered(q, ans) {
+  const v = ans[q.id];
+  if (v === null || v === undefined) return false;
+  if (q.type === "matrix") return !v._partial;
+  return true;
+}
+
+function refresh() {
+  const answers = readAll();
+  let total = 0, done = 0;
+
+  SCHEMA.forEach((sec) => {
+    const secVisible = isSectionVisible(sec, answers);
+    sec._node.hidden = !secVisible;
+    sec.questions.forEach((q) => {
+      const vis = isQuestionVisible(sec, q, answers);
+      questionIndex[q.id].node.hidden = !vis;
+      if (vis && q.required) { total++; if (isAnswered(q, answers)) done++; }
+    });
+  });
+
+  // renumera les seccions visibles
+  let n = 0;
+  SCHEMA.forEach((sec) => {
+    if (sec._node.hidden) return;
+    n++;
+    sec._node.querySelector(".sec-num").textContent = String(n);
+  });
+
+  progressBar.style.width = total ? `${Math.round((done / total) * 100)}%` : "0%";
+  progressBar.parentElement.setAttribute("role", "progressbar");
+  progressBar.parentElement.setAttribute("aria-valuenow", total ? Math.round((done / total) * 100) : 0);
+  progressBar.parentElement.setAttribute("aria-valuemin", "0");
+  progressBar.parentElement.setAttribute("aria-valuemax", "100");
+  progressBar.parentElement.setAttribute("aria-label", t("progress_label"));
+  return answers;
+}
+
+form.addEventListener("input", () => refresh());
+form.addEventListener("change", () => refresh());
+
+/* ============================================================================
+   Validació
+   ========================================================================== */
+function validate() {
+  const answers = readAll();
+  let first = null;
+
+  SCHEMA.forEach((sec) => {
+    sec.questions.forEach((q) => {
+      const node = questionIndex[q.id].node;
+      node.classList.remove("invalid");
+      if (!isQuestionVisible(sec, q, answers) || !q.required) return;
+
+      let bad = !isAnswered(q, answers);
+
+      // matriu: si una fila usa una opció amb text lliure ("app"), cal especificar-la
+      if (!bad && q.type === "matrix") {
+        q.rows.forEach((r) => {
+          const cell = answers[q.id][r.id];
+          if (!cell) return;
+          const chosen = cell.values || [cell.value];
+          chosen.forEach((v) => {
+            const opt = q.options.find((o) => o.v === v);
+            if (!opt || !opt.other) return;
+            const txt = cell.values ? (cell.other || {})[v] : cell.other;
+            if (!txt) bad = true;
+          });
+        });
+      }
+
+      // si s'ha triat una opció "altres", cal el text
+      if (!bad && (q.type === "radio" || q.type === "checkbox")) {
+        const chosen = q.type === "radio" ? [answers[q.id].value] : answers[q.id].values;
+        chosen.forEach((v) => {
+          const opt = q.options.find((o) => o.v === v);
+          if (opt && opt.other) {
+            const txt = q.type === "radio" ? answers[q.id].other : (answers[q.id].other || {})[v];
+            if (!txt) bad = true;
+          }
+        });
+      }
+
+      if (bad) {
+        node.classList.add("invalid");
+        const errNode = node.querySelector(".q-err");
+        errNode.dataset.i18n = isAnswered(q, answers) ? "err_other" : "err_required";
+        errNode.textContent = t(errNode.dataset.i18n);
+        if (!first) first = node;
+      }
+    });
+  });
+
+  return { ok: !first, first, answers };
+}
+
+/* ============================================================================
+   Desat de respostes
+   ========================================================================== */
+function storageApi() {
+  const s = window.storage || (window.claude && window.claude.storage);
+  return (s && typeof s.set === "function") ? s : null;
+}
+
+// Còpia de seguretat al navegador. Sempre que es pugui, perquè cap resposta
+// es perdi encara que el backend falli. Es pot recuperar amb #export.
+function saveLocalCopy(key, record) {
+  try {
+    localStorage.setItem(key, JSON.stringify(record));
+    const idx = JSON.parse(localStorage.getItem("respuestas:index") || "[]");
+    if (idx.indexOf(key) === -1) idx.push(key);
+    localStorage.setItem("respuestas:index", JSON.stringify(idx));
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+async function postToEndpoint(record) {
+  // La primera petició després d'una estona pot trigar 10-15 s (arrencada en fred
+  // d'Apps Script). Donem marge, però no ens hi quedem penjats per sempre.
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), 45000);
+
+  let res;
+  try {
+    // text/plain evita el preflight CORS, que els web apps d'Apps Script no responen.
+    res = await fetch(ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(record),
+      redirect: "follow",
+      signal: ctl.signal
+    });
+  } finally {
+    clearTimeout(timer);
+  }
+  if (!res.ok) throw new Error("http-" + res.status);
+
+  // Si la resposta no es pot llegir (redirecció opaca), donem el POST per bo:
+  // només fallem quan el backend diu explícitament que ha anat malament.
+  let data = null;
+  try { data = await res.json(); } catch (e) {}
+  if (data && data.ok === false) throw new Error(data.error || "backend-error");
+}
+
+async function saveResponse(record) {
+  const key = `respuestas:${record.id}`;
+
+  if (ENDPOINT) {
+    try {
+      await postToEndpoint(record);
+    } catch (e) {
+      saveLocalCopy(key, record);   // no la perdem, però avisem
+      throw e;
+    }
+    saveLocalCopy(key, record);
+    return "backend";
+  }
+
+  const api = storageApi();
+  if (api) {
+    await api.set(key, JSON.stringify(record), { shared: true });
+    return "shared";
+  }
+
+  if (saveLocalCopy(key, record)) return "local";
+  throw new Error("no-storage");
+}
+
+form.addEventListener("submit", async (ev) => {
+  ev.preventDefault();
+  formErr.classList.remove("show");
+
+  const { ok, first, answers } = validate();
+  if (!ok) {
+    formErr.dataset.i18n = "err_form";
+    formErr.textContent = t("err_form");
+    formErr.classList.add("show");
+    first.scrollIntoView({ behavior: "smooth", block: "center" });
+    return;
+  }
+
+  // Neteja: només les preguntes visibles entren al registre.
+  const visible = {};
+  SCHEMA.forEach((sec) => sec.questions.forEach((q) => {
+    if (isQuestionVisible(sec, q, answers) && answers[q.id] !== null) visible[q.id] = answers[q.id];
+  }));
+
+  // L'id es genera un cop per formulari omplert i es reutilitza en els reintents,
+  // perquè un enviament que falla a mitges no acabi generant dues files.
+  if (!pendingId) pendingId = uuid();
+
+  const record = {
+    id: pendingId,
+    timestamp: new Date().toISOString(),
+    versio_formulari: 1,
+    idioma: lang,
+    respostes: visible
+  };
+
+  submitBtn.disabled = true;
+  submitBtn.textContent = t("submitting");
+
+  try {
+    const where = await saveResponse(record);
+    document.getElementById("form-view").hidden = true;
+    document.getElementById("thanks-view").hidden = false;
+    const note = document.getElementById("storage-note");
+    if (where === "local") { note.dataset.i18n = "saved_local"; note.textContent = t("saved_local"); }
+    else { delete note.dataset.i18n; note.textContent = ""; }
+    progressBar.style.width = "100%";
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } catch (e) {
+    console.error("Error desant la resposta:", e);
+    formErr.dataset.i18n = "err_save";
+    formErr.textContent = t("err_save");
+    formErr.classList.add("show");
+    submitBtn.disabled = false;
+    submitBtn.textContent = t("submit");
+  }
+});
+
+/* ============================================================================
+   Canvi d'idioma
+   ========================================================================== */
+function applyLang() {
+  document.documentElement.lang = t("lang_attr");
+  document.title = t("doc_title");
+
+  document.querySelectorAll("[data-i18n]").forEach((n) => { n.textContent = t(n.dataset.i18n); });
+  document.querySelectorAll("[data-ph]").forEach((n) => {
+    const k = n.dataset.ph;
+    n.placeholder = k ? t(k) : "";
+  });
+  document.querySelectorAll(".other-input").forEach((n) => { n.placeholder = t(n.dataset.ph || "other_ph"); });
+
+  document.querySelectorAll(".lang button").forEach((b) => {
+    b.setAttribute("aria-pressed", String(b.dataset.lang === lang));
+  });
+
+  if (!submitBtn.disabled) submitBtn.textContent = t("submit");
+  refresh();
+}
+
+document.querySelectorAll(".lang button").forEach((b) => {
+  b.addEventListener("click", () => {
+    lang = b.dataset.lang;
+    try { localStorage.setItem("enquesta:lang", lang); } catch (e) {}
+    applyLang();
+  });
+});
+
+try {
+  const saved = localStorage.getItem("enquesta:lang");
+  if (saved && T[saved]) lang = saved;
+  else if ((navigator.language || "").toLowerCase().startsWith("de")) lang = "de";
+} catch (e) {}
+
+/* ============================================================================
+   Vista d'exportació (#export) — només respostes locals d'aquest navegador
+   ========================================================================== */
+function maybeExport() {
+  const on = location.hash === "#export";
+  document.getElementById("export-view").hidden = !on;
+  document.getElementById("form-view").hidden = on || !document.getElementById("thanks-view").hidden;
+  if (!on) return;
+  let rows = [];
+  try {
+    const idx = JSON.parse(localStorage.getItem("respuestas:index") || "[]");
+    rows = idx.map((k) => JSON.parse(localStorage.getItem(k) || "null")).filter(Boolean);
+  } catch (e) {}
+  document.getElementById("export-box").value = JSON.stringify(rows, null, 2);
+}
+window.addEventListener("hashchange", maybeExport);
+
+applyLang();
+maybeExport();
+</script>
+</body>
+</html>
