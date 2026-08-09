@@ -46,7 +46,8 @@
     max-width:640px;margin:0 auto;padding:10px 16px;
     display:flex;align-items:center;gap:12px;justify-content:space-between;
   }
-  .brand{display:flex;align-items:center;gap:8px;font-weight:650;font-size:14px;letter-spacing:.01em}
+  .brand{display:flex;align-items:center;gap:8px;font-weight:650;font-size:14px;letter-spacing:.01em;min-width:0}
+  .brand span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .brand-dot{width:9px;height:9px;border-radius:50%;background:var(--accent);flex:none}
   .lang{display:flex;gap:4px;background:#F1E7DB;padding:3px;border-radius:999px}
   .lang button{
@@ -55,6 +56,12 @@
     padding:5px 12px;border-radius:999px;transition:.15s;
   }
   .lang button[aria-pressed="true"]{background:var(--card);color:var(--ink);box-shadow:0 1px 2px rgba(44,37,33,.12)}
+  .lang{flex:none}
+  /* Amb tres idiomes, a pantalles estretes el selector s'ha de comprimir. */
+  @media (max-width:400px){
+    .lang button{padding:5px 8px;font-size:12.5px}
+    .brand{font-size:13px}
+  }
   .progress-track{height:3px;background:#EDE1D4}
   .progress-bar{height:100%;width:0;background:var(--accent);transition:width .3s ease}
 
@@ -212,6 +219,7 @@
     <div class="brand"><span class="brand-dot"></span><span data-i18n="brand"></span></div>
     <div class="lang" role="group" aria-label="Idioma">
       <button type="button" data-lang="ca" aria-pressed="true">Català</button>
+      <button type="button" data-lang="es" aria-pressed="false">Español</button>
       <button type="button" data-lang="de" aria-pressed="false">Deutsch</button>
     </div>
   </div>
@@ -543,6 +551,144 @@ const T = {
     o_cf_2: "Eines von beiden hat Vorrang, das andere leidet darunter",
     o_cf_3: "Es wird nicht gut gelöst",
     o_cf_4: "Anderes (bitte angeben)"
+  },
+
+  es: {
+    lang_attr: "es",
+    doc_title: "Encuesta · Gestión de equipos de voleibol",
+    brand: "Encuesta voleibol",
+    intro_title: "¿Cómo gestionáis el día a día de vuestro equipo?",
+    intro_text: "Estamos investigando cómo entrenadores, entrenadoras y clubes de voleibol gestionan la asistencia, los entrenamientos y la temporada. Te llevará unos 5 minutos.",
+    intro_badge: "Anónimo · no pedimos ningún dato de contacto",
+    submit: "Enviar respuestas",
+    submitting: "Enviando…",
+    privacy: "No se recoge ni el correo ni el teléfono. Las respuestas se utilizan solo de forma agregada.",
+    err_required: "Esta pregunta es obligatoria.",
+    err_other: "Especifica la respuesta.",
+    err_form: "Faltan algunas respuestas obligatorias. Las hemos marcado arriba.",
+    err_save: "No hemos podido enviar tu respuesta. Hemos guardado una copia en este dispositivo; comprueba la conexión y vuelve a intentarlo.",
+    progress_label: "Progreso del formulario",
+    thanks_title: "¡Gracias!",
+    thanks_text: "Tu respuesta se ha guardado. Nos ayuda a decidir qué construir primero para entrenadores y clubes de voleibol.",
+    saved_local: "Guardado localmente en este dispositivo.",
+    export_title: "Respuestas guardadas en este dispositivo",
+    export_text: "Copia este JSON para analizarlo. Solo muestra las respuestas guardadas localmente en este navegador.",
+    other_ph: "Especifica…",
+    app_ph: "¿Qué app?",
+    optional: "opcional",
+    teams_cap: "Equipos",
+    players_cap: "Jugadores/as",
+
+    sec_context: "Contexto",
+    sec_tools: "Herramientas actuales",
+    sec_pain: "Frustraciones",
+    sec_interest: "Interés",
+    sec_club: "Coordinación de club",
+    sec_player: "Entrenar y jugar a la vez",
+    sec_club_note: "Esta sección aparece porque has indicado un rol de coordinación en el club.",
+
+    q_role: "¿Cuál es tu rol en el club?",
+    q_role_hint: "Puedes marcar más de uno si tienes varios.",
+    o_role_coach: "Entrenador/a",
+    o_role_td: "Director/a técnico/a",
+    o_role_coord: "Coordinador/a de club",
+    o_role_other: "Otros (especifica)",
+
+    q_levels: "¿Qué niveles entrenas?",
+    q_levels_hint: "Puedes marcar más de uno.",
+    o_lvl_mini: "Mini Voley",
+    o_lvl_infantil: "Infantil",
+    o_lvl_cadet: "Cadete",
+    o_lvl_juvenil: "Juvenil",
+    o_lvl_junior: "Junior",
+    o_lvl_senior: "Sénior",
+
+    q_size_manage: "¿Cuántos equipos y jugadores gestionas?",
+    q_club_name: "Nombre del club",
+    q_club_name_ph: "Por ejemplo: CV Girona",
+    q_club_size: "Tamaño aproximado del club",
+    o_club_small: "Pequeño (menos de 10 equipos)",
+    o_club_mid: "Mediano (10-20 equipos)",
+    o_club_big: "Grande (más de 20 equipos)",
+
+    q_tools: "Para cada tarea, ¿qué usas hoy?",
+    q_tools_hint: "Puedes marcar más de una opción por tarea.",
+    r_attendance: "Control de asistencia",
+    r_sessions: "Planificación de entrenamientos y sesiones",
+    r_season: "Planificación de temporada (objetivos, periodización)",
+    r_stats: "Estadísticas o scouting de partidos",
+    r_comms: "Comunicación con jugadores y familias",
+    o_t_excel: "Excel / hoja de cálculo",
+    o_t_paper: "Papel",
+    o_t_wa: "WhatsApp / Telegram",
+    o_t_app: "App específica",
+    o_t_none: "Nada",
+
+    q_admin_time: "¿Cuánto tiempo a la semana dedicas a tareas administrativas (no a entrenar)?",
+    o_time_1: "Menos de 1 h",
+    o_time_2: "1-3 h",
+    o_time_3: "3-6 h",
+    o_time_4: "Más de 6 h",
+
+    q_pain: "De estas tareas, ¿cuál te quita más tiempo o te frustra más?",
+    q_pain_hint: "Puedes marcar más de una.",
+    o_p_attendance: "Control de asistencia",
+    o_p_sessions: "Diseño de sesiones",
+    o_p_season: "Seguimiento del progreso de la temporada",
+    o_p_comms: "Comunicación con jugadores y familias",
+    o_p_stats: "Estadísticas de partido",
+    o_p_other: "Otra (especifica)",
+
+    q_pain_story: "Cuéntanos la última vez que perdiste tiempo o cometiste un error por no tener esto bien organizado.",
+    q_pain_story_ph: "¿Qué pasó? ¿Cómo lo resolviste?",
+    q_satisfaction: "¿Cómo de satisfecho/a estás con tu forma actual de gestionar estas tareas?",
+    sc_sat_low: "1 · Nada satisfecho/a",
+    sc_sat_high: "5 · Muy satisfecho/a",
+
+    q_try: "Si existiera una herramienta digital pensada específicamente para voleibol que resolviera tu principal problema, ¿la probarías?",
+    o_try_1: "Sí, seguro",
+    o_try_2: "Probablemente",
+    o_try_3: "No lo sé",
+    o_try_4: "Probablemente no",
+    q_pay: "¿Pagarías algo por una herramienta así?",
+    o_pay_1: "Nada, solo si es gratuita",
+    o_pay_2: "Algo simbólico, unos pocos euros al mes",
+    o_pay_3: "Una cuota mensual razonable si me resuelve el problema",
+    o_pay_4: "Depende del precio y de las funcionalidades",
+    q_wish: "¿Hay algo más que te gustaría que resolviera una herramienta así?",
+    q_wish_ph: "Cualquier idea nos sirve.",
+
+    q_assign: "¿Cómo asignáis hoy qué entrenador lleva cada equipo a lo largo de la temporada?",
+    o_as_1: "Criterio informal, de memoria",
+    o_as_2: "Hoja de cálculo",
+    o_as_3: "Reunión y decisión manual cada temporada",
+    o_as_4: "Otro (especifica)",
+    q_courts: "¿Qué usáis para planificar los horarios de pista o pabellón de toda la temporada (entrenamientos y partidos de todos los equipos)?",
+    o_ct_1: "Excel / hoja de cálculo",
+    o_ct_2: "Papel",
+    o_ct_3: "App de gestión de instalaciones",
+    o_ct_4: "Otro (especifica)",
+    q_overlap_easy: "¿Cómo de fácil es hoy detectar solapamientos de horario entre equipos o entrenadores?",
+    sc_easy_low: "1 · Muy difícil",
+    sc_easy_high: "5 · Muy fácil",
+    q_overlap_story: "Cuéntanos la última vez que hubo un problema de solapamiento de horarios (de pista, de entrenador, de partido) y cómo lo resolvisteis.",
+    q_overlap_story_ph: "¿Qué pasó? ¿Quién lo resolvió y cómo?",
+    q_doblatges: "¿Cómo de fácil es planificar los dobles de jugadores?",
+    q_doblatges_hint: "Jugadores/as que juegan o entrenan con más de un equipo del club.",
+
+    q_is_player: "Además de entrenar, ¿eres también jugador/a de algún equipo (del mismo club o de otro)?",
+    o_yes: "Sí",
+    o_no: "No",
+    q_clash: "¿Se han solapado alguna vez tus horarios de entrenamiento o partido como jugador/a con tus horarios como entrenador/a?",
+    o_cl_1: "Sí, a menudo",
+    o_cl_2: "Sí, alguna vez",
+    o_cl_3: "No",
+    o_cl_4: "No lo sé",
+    q_clash_fix: "¿Cómo se suele resolver hoy ese solapamiento?",
+    o_cf_1: "Cambio de horario acordado manualmente con el club",
+    o_cf_2: "Se prioriza uno de los dos y el otro se resiente",
+    o_cf_3: "No se resuelve bien",
+    o_cf_4: "Otro (especifica)"
   }
 };
 
@@ -1198,7 +1344,13 @@ document.querySelectorAll(".lang button").forEach((b) => {
 try {
   const saved = localStorage.getItem("enquesta:lang");
   if (saved && T[saved]) lang = saved;
-  else if ((navigator.language || "").toLowerCase().startsWith("de")) lang = "de";
+  else {
+    // "ca" és el valor per defecte; només el canviem si el navegador diu una
+    // altra cosa. Un navegador en català ("ca", "ca-ES") ja hi cau tot sol.
+    const nav = (navigator.language || "").toLowerCase();
+    if (nav.startsWith("de")) lang = "de";
+    else if (nav.startsWith("es")) lang = "es";
+  }
 } catch (e) {}
 
 /* ============================================================================
