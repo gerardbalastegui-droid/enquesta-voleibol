@@ -1284,6 +1284,8 @@ form.addEventListener("submit", async (ev) => {
   const record = {
     id: pendingId,
     timestamp: new Date().toISOString(),
+    // Súbelo a mano si cambias preguntas u opciones con respuestas ya recogidas.
+    // Ver README.md > "Sube versio_formulari si cambias las preguntas".
     versio_formulari: 1,
     idioma: lang,
     respostes: visible
