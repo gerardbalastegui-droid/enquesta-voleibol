@@ -369,6 +369,19 @@ const T = {
     sc_sat_low: "1 · Gens satisfet/a",
     sc_sat_high: "5 · Molt satisfet/a",
 
+    q_falten: "Amb quina freqüència et passa que et falten jugadors a última hora i la sessió que tenies preparada ja no encaixa?",
+    o_fal_setmanal: "Gairebé cada setmana",
+    o_fal_mensual: "Un parell de cops al mes",
+    o_fal_temporada: "Alguna vegada per temporada",
+    o_fal_mai: "Gairebé mai",
+    q_falten_que: "Quan et passa, què fas amb la sessió que tenies preparada?",
+    q_falten_que_hint: "Pots marcar-ne més d'una.",
+    o_falq_improviso: "Improviso sobre la marxa",
+    o_falq_adapto: "Adapto els exercicis que tenia preparats",
+    o_falq_canvio: "Canvio a una altra sessió que sé que funciona amb menys gent",
+    o_falq_igual: "Faig la sessió tal com estava, encara que no acabi de sortir",
+    o_falq_altra: "Altra (especifica)",
+
     q_try: "Si existís una eina digital pensada específicament per al voleibol que resolgués el teu principal problema, la provaries?",
     o_try_1: "Sí, segur",
     o_try_2: "Probablement",
@@ -506,6 +519,19 @@ const T = {
     q_satisfaction: "Wie zufrieden bist du mit deiner aktuellen Art, diese Aufgaben zu verwalten?",
     sc_sat_low: "1 · Gar nicht zufrieden",
     sc_sat_high: "5 · Sehr zufrieden",
+
+    q_falten: "Wie oft kommt es vor, dass kurzfristig Spieler:innen fehlen und die vorbereitete Trainingseinheit nicht mehr passt?",
+    o_fal_setmanal: "Fast jede Woche",
+    o_fal_mensual: "Ein paar Mal im Monat",
+    o_fal_temporada: "Ein paar Mal pro Saison",
+    o_fal_mai: "Fast nie",
+    q_falten_que: "Was machst du dann mit der vorbereiteten Einheit?",
+    q_falten_que_hint: "Mehrfachauswahl möglich.",
+    o_falq_improviso: "Ich improvisiere spontan",
+    o_falq_adapto: "Ich passe die vorbereiteten Übungen an",
+    o_falq_canvio: "Ich wechsle zu einer anderen Einheit, die mit weniger Leuten funktioniert",
+    o_falq_igual: "Ich ziehe die Einheit trotzdem durch, auch wenn sie nicht aufgeht",
+    o_falq_altra: "Etwas anderes (bitte angeben)",
 
     q_try: "Wenn es ein digitales Werkzeug speziell für Volleyball gäbe, das dein Hauptproblem löst — würdest du es ausprobieren?",
     o_try_1: "Ja, auf jeden Fall",
@@ -645,6 +671,19 @@ const T = {
     sc_sat_low: "1 · Nada satisfecho/a",
     sc_sat_high: "5 · Muy satisfecho/a",
 
+    q_falten: "¿Con qué frecuencia te pasa que te faltan jugadores a última hora y la sesión que tenías preparada ya no encaja?",
+    o_fal_setmanal: "Casi cada semana",
+    o_fal_mensual: "Un par de veces al mes",
+    o_fal_temporada: "Alguna vez por temporada",
+    o_fal_mai: "Casi nunca",
+    q_falten_que: "Cuando te pasa, ¿qué haces con la sesión que tenías preparada?",
+    q_falten_que_hint: "Puedes marcar más de una.",
+    o_falq_improviso: "Improviso sobre la marcha",
+    o_falq_adapto: "Adapto los ejercicios que tenía preparados",
+    o_falq_canvio: "Cambio a otra sesión que sé que funciona con menos gente",
+    o_falq_igual: "Hago la sesión tal cual, aunque no acabe de salir",
+    o_falq_altra: "Otra (especifica)",
+
     q_try: "Si existiera una herramienta digital pensada específicamente para voleibol que resolviera tu principal problema, ¿la probarías?",
     o_try_1: "Sí, seguro",
     o_try_2: "Probablemente",
@@ -766,7 +805,25 @@ const SCHEMA = [
       ]},
       { id: "dolor_historia", type: "textarea", label: "q_pain_story", placeholder: "q_pain_story_ph", required: true },
       { id: "satisfaccio", type: "scale", label: "q_satisfaction", required: true,
-        low: "sc_sat_low", high: "sc_sat_high" }
+        low: "sc_sat_low", high: "sc_sat_high" },
+      // Van al final de la secció a propòsit: si es preguntessin abans de
+      // "q_pain_story", contaminarien la resposta oberta i perdríem el senyal
+      // de qui ho menciona espontàniament, que és el que ens va portar aquí.
+      { id: "falten", type: "radio", label: "q_falten", required: true, options: [
+          { v: "setmanal",  t: "o_fal_setmanal" },
+          { v: "mensual",   t: "o_fal_mensual" },
+          { v: "temporada", t: "o_fal_temporada" },
+          { v: "mai",       t: "o_fal_mai" }
+      ]},
+      { id: "falten_que", type: "checkbox", label: "q_falten_que", hint: "q_falten_que_hint", required: true,
+        showIf: (a) => !!(a.falten && a.falten.value && a.falten.value !== "mai"),
+        options: [
+          { v: "improviso", t: "o_falq_improviso" },
+          { v: "adapto",    t: "o_falq_adapto" },
+          { v: "canvio",    t: "o_falq_canvio" },
+          { v: "igual",     t: "o_falq_igual" },
+          { v: "altra",     t: "o_falq_altra", other: true }
+      ]}
     ]
   },
   {
@@ -1286,7 +1343,7 @@ form.addEventListener("submit", async (ev) => {
     timestamp: new Date().toISOString(),
     // Súbelo a mano si cambias preguntas u opciones con respuestas ya recogidas.
     // Ver README.md > "Sube versio_formulari si cambias las preguntas".
-    versio_formulari: 1,
+    versio_formulari: 2,
     idioma: lang,
     respostes: visible
   };
